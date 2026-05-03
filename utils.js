@@ -1,0 +1,20 @@
+export const fmt = (n) =>
+  new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP' }).format(n ?? 0)
+
+export const today = () => new Date().toISOString().slice(0, 10)
+
+export const apiFetch = async (path, opts = {}) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('dopchain_token') : null
+  const res = await fetch(path, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...opts.headers,
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Error del servidor')
+  return data
+}
